@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/calc_button.dart';
-import '../widgets/top_tab_bar.dart';
+import 'calc_button.dart';
 
-class CalcScreen extends StatefulWidget {
+class CalculatorTab extends StatefulWidget {
+  static const routeName = '/calculator-screen';
   @override
-  State<CalcScreen> createState() => _CalcScreenState();
+  State<CalculatorTab> createState() => _CalculatorTabState();
 }
 
-class _CalcScreenState extends State<CalcScreen> {
+class _CalculatorTabState extends State<CalculatorTab> {
   var textController = TextEditingController();
   var resultTextController = TextEditingController();
 
@@ -203,117 +203,117 @@ class _CalcScreenState extends State<CalcScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          TopTabBar(),
-          TextField(
-            readOnly: true,
-            textAlign: TextAlign.right,
-            controller: textController,
-            // style: TextStyle(
-            //   fontSize: textController.text.isEmpty ? 20 : 24,
-            // ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        TextField(
+          readOnly: true,
+          textAlign: TextAlign.right,
+          controller: textController,
+          style: TextStyle(
+            // fontSize: textController.text.isEmpty ? 20 : 24,
+            fontSize: 20,
           ),
-          TextField(
-            readOnly: true,
-            textAlign: TextAlign.right,
-            controller: resultTextController,
-            // style: TextStyle(
-            //   fontSize: textController.text.isEmpty ? 24 : 20,
-            // ),
+        ),
+        TextField(
+          readOnly: true,
+          textAlign: TextAlign.right,
+          controller: resultTextController,
+          style: TextStyle(
+            // fontSize: textController.text.isEmpty ? 24 : 20,
+            fontSize: 24,
           ),
-          Expanded(
-            child: GridView.count(
-              crossAxisCount: 4,
-              children: [
-                CalcButton('C', _clear),
-                CalcButton('\u232b', _deleteSymbol),
-                CalcButton('%', () {}),
-                CalcButton('\u00F7', () {
-                  _tapOper('\u00F7');
-                }),
-                CalcButton(
-                  '7',
-                  () {
-                    _tapNum('7');
-                  },
-                ),
-                CalcButton(
-                  '8',
-                  () {
-                    _tapNum('8');
-                  },
-                ),
-                CalcButton(
-                  '9',
-                  () {
-                    _tapNum('9');
-                  },
-                ),
-                CalcButton('\u00d7', () {
-                  _tapOper('\u00d7');
-                }),
-                CalcButton(
-                  '4',
-                  () {
-                    _tapNum('4');
-                  },
-                ),
-                CalcButton(
-                  '5',
-                  () {
-                    _tapNum('5');
-                  },
-                ),
-                CalcButton(
-                  '6',
-                  () {
-                    _tapNum('6');
-                  },
-                ),
-                CalcButton('-', () {
-                  _tapOper('-');
-                }),
-                CalcButton(
-                  '1',
-                  () {
-                    _tapNum('1');
-                  },
-                ),
-                CalcButton(
-                  '2',
-                  () {
-                    _tapNum('2');
-                  },
-                ),
-                CalcButton(
-                  '3',
-                  () {
-                    _tapNum('3');
-                  },
-                ),
-                CalcButton('+', () {
-                  _tapOper('+');
-                }),
-                IconButton(
-                  icon: Icon(Icons.change_circle_outlined),
-                  color: Theme.of(context).primaryColor,
-                  onPressed: () {},
-                ),
-                CalcButton(
-                  '0',
-                  () {
-                    _tapNum('0');
-                  },
-                ),
-                CalcButton('.', () {}),
-                CalcButton('=', _getResult),
-              ],
-            ),
+        ),
+        Expanded(
+          child: GridView.count(
+            crossAxisCount: 4,
+            children: [
+              CalcButton('C', _clear),
+              CalcButton('\u232b', _deleteSymbol),
+              CalcButton('%', () {}),
+              CalcButton('\u00F7', () {
+                _tapOper('\u00F7');
+              }),
+              CalcButton(
+                '7',
+                () {
+                  _tapNum('7');
+                },
+              ),
+              CalcButton(
+                '8',
+                () {
+                  _tapNum('8');
+                },
+              ),
+              CalcButton(
+                '9',
+                () {
+                  _tapNum('9');
+                },
+              ),
+              CalcButton('\u00d7', () {
+                _tapOper('\u00d7');
+              }),
+              CalcButton(
+                '4',
+                () {
+                  _tapNum('4');
+                },
+              ),
+              CalcButton(
+                '5',
+                () {
+                  _tapNum('5');
+                },
+              ),
+              CalcButton(
+                '6',
+                () {
+                  _tapNum('6');
+                },
+              ),
+              CalcButton('-', () {
+                _tapOper('-');
+              }),
+              CalcButton(
+                '1',
+                () {
+                  _tapNum('1');
+                },
+              ),
+              CalcButton(
+                '2',
+                () {
+                  _tapNum('2');
+                },
+              ),
+              CalcButton(
+                '3',
+                () {
+                  _tapNum('3');
+                },
+              ),
+              CalcButton('+', () {
+                _tapOper('+');
+              }),
+              IconButton(
+                icon: Icon(Icons.change_circle_outlined),
+                color: Theme.of(context).primaryColor,
+                onPressed: () {},
+              ),
+              CalcButton(
+                '0',
+                () {
+                  _tapNum('0');
+                },
+              ),
+              CalcButton('.', () {}),
+              CalcButton('=', _getResult),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
