@@ -1,6 +1,6 @@
 # calculator
 
-A new Flutter project, that have simple calculator and unit converter
+A new Flutter project, that have simple calculator and unit converter. This project not finished.
 
 ## Getting Started
 
