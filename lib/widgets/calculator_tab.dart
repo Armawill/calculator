@@ -18,12 +18,53 @@ class _CalculatorTabState extends State<CalculatorTab> {
   List<String> interimOperations = [];
   num res = 0;
 
+  String getResText() => resultTextController.text;
+  String getText() => textController.text;
+  void setResText(String value) {
+    resultTextController.text = value;
+  }
+
+  void setText(String value) {
+    textController.text = value;
+  }
+
   void _tapNum(String digit) {
-    textController.text += digit;
+    textController.text = textController.text.replaceAll(RegExp(r','), '');
+    var last = textController.text.length - 1;
+
+    if (textController.text == '0' && (digit == '0' || digit == '00')) {
+      return;
+    }
+    if ((textController.text.isEmpty ||
+            (operations.isNotEmpty &&
+                textController.text[last] == operations.last)) &&
+        digit == '00') {
+      digit = digit[0];
+    }
+    if (textController.text.isNotEmpty &&
+        textController.text[last] == '0' &&
+        (operations.isNotEmpty &&
+            textController.text[last - 1] == operations.last)) {
+      if (digit == '00') {
+        textController.text =
+            textController.text.replaceRange(last, null, digit[0]);
+      } else {
+        textController.text =
+            textController.text.replaceRange(last, null, digit);
+      }
+    } else {
+      if (textController.text == '0' && digit != '0') {
+        textController.text = digit;
+      } else {
+        textController.text += digit;
+      }
+    }
+
     num? number;
     if (operations.isEmpty) {
       number = int.tryParse(textController.text) ??
           double.tryParse(textController.text);
+
       if (_numbers.isEmpty) {
         _numbers.add(number ?? 0);
       } else {
@@ -43,17 +84,99 @@ class _CalculatorTabState extends State<CalculatorTab> {
         }
       }
     }
+    addCommaToNumber();
     //print(_numbers);
 
-    res = _calculate();
-    resultTextController.text = (res).toString();
+    _setResult();
+  }
+
+  void addComma(num value, Function setText, Function getText) {
+    String text;
+    bool firstComma = true;
+    while (value / 1000 >= 1) {
+      text = getText();
+      if (text.contains('.')) {
+        var dotIndex = text.indexOf('.');
+        if (firstComma) {
+          firstComma = false;
+          setText(text.substring(0, dotIndex - 3) +
+              ',' +
+              text.substring(dotIndex - 3));
+        } else {
+          var commaIndex = text.indexOf(',');
+          setText(text.substring(0, commaIndex - 3) +
+              ',' +
+              text.substring(commaIndex - 3));
+        }
+      } else {
+        if (firstComma) {
+          firstComma = false;
+          setText(text.substring(0, text.length - 3) +
+              ',' +
+              text.substring(text.length - 3));
+        } else {
+          var commaIndex = text.indexOf(',');
+          setText(text.substring(0, commaIndex - 3) +
+              ',' +
+              text.substring(commaIndex - 3));
+        }
+      }
+      value /= 1000;
+    }
+  }
+
+  void addCommaToNumber() {
+    num value;
+    String text;
+    String fullText = '';
+    for (int i = 0; i < _numbers.length; i++) {
+      if (_numbers[i] >= 1000) {
+        value = _numbers[i];
+        text = _numbers[i].toString();
+        addComma(
+          value,
+          (val) {
+            text = val;
+          },
+          () {
+            return text;
+          },
+        );
+        fullText += text;
+        if (operations.length > i) {
+          fullText += operations[i];
+        }
+      } else {
+        fullText += _numbers[i].toString();
+        if (operations.length > i) {
+          fullText += operations[i];
+        }
+      }
+    }
+    textController.text = fullText;
+  }
+
+  void _setResult() {
+    try {
+      res = _calculate();
+      resultTextController.text = res.toString();
+      addComma(res, setResText, getResText);
+    } on IntegerDivisionByZeroException {
+      print('division by zero');
+      resultTextController.text = 'Can\'t devide by zero';
+    }
   }
 
   num _calculate() {
+    textController.text.replaceAll(RegExp(r','), '');
     _interimNumbers.clear();
     interimOperations.clear();
     for (int i = 0; i < operations.length; i++) {
       if (operations.isNotEmpty && _numbers.length > 1) {
+        if (i == operations.length - 1 &&
+            _numbers.length == operations.length) {
+          break;
+        }
         if (operations[i] == '\u00F7' || operations[i] == '\u00d7') {
           if (i > 0) {
             if (operations[i - 1] == '\u00F7' ||
@@ -113,43 +236,92 @@ class _CalculatorTabState extends State<CalculatorTab> {
   }
 
   num _performOperation(num num1, num num2, String oper) {
+    num result;
     switch (oper) {
       case '+':
-        return num1 + num2;
+        result = num1 + num2;
+        break;
       case '-':
-        return num1 - num2;
+        result = num1 - num2;
+        break;
       case '\u00d7':
-        return num1 * num2;
+        result = num1 * num2;
+        break;
       case '\u00F7':
-        return num1 / num2 == num1 ~/ num2 ? num1 ~/ num2 : num1 / num2;
+        // if (num2 == 0) {
+        //   setState(() {
+        //     resultTextController.text = 'Can\'t devide by zero';
+        //   });
+        // }
+        result = num1 / num2 == num1 ~/ num2 ? num1 ~/ num2 : num1 / num2;
+        break;
       default:
         return 0;
+    }
+    var bufRes = result.toInt();
+    if (bufRes == result) {
+      return bufRes;
+    } else {
+      return result;
     }
   }
 
   void _tapOper(String oper) {
-    if (textController.text != 0 && textController.text != '') {
-      // var num = int.tryParse(textController.text) ??
-      //     double.tryParse(textController.text) ??
-      //     int.tryParse(resultTextController.text) ??
-      //     double.tryParse(resultTextController.text);
-      // if (num != null) {
-      //   _numbers.add(num);
-      // }
+    if (/*textController.text != 0 &&*/ textController.text != '') {
+      textController.text += oper;
+      operations.add(oper);
+    }
+    if (textController.text.isEmpty && resultTextController.text.isNotEmpty) {
+      textController.text += res.toString();
+      _numbers.add(res);
       textController.text += oper;
       operations.add(oper);
     }
   }
 
+  void _tapPercent() {
+    if (operations.isEmpty) {
+      _numbers.last = _numbers.last / 100;
+      textController.text = _numbers.last.toString();
+    } else {
+      if (textController.text[textController.text.length - 1] !=
+          operations.last) {
+        _numbers.last = _numbers.last / 100;
+        textController.text = textController.text.replaceRange(
+            textController.text.lastIndexOf(operations.last) + 1,
+            null,
+            _numbers.last.toString());
+      }
+    }
+    _setResult();
+  }
+
+  void _tapDot() {
+    var text = textController.text;
+
+    if (text.isEmpty) {
+      textController.text += '0.';
+    } else if ((operations.isEmpty && !text.contains('.')) ||
+        (operations.isNotEmpty &&
+            text.lastIndexOf('.') < text.lastIndexOf(operations.last))) {
+      textController.text += '.';
+    }
+  }
+
   void _deleteSymbol() {
+    textController.text = textController.text.replaceAll(RegExp(r','), '');
     if (textController.text.isNotEmpty) {
       if (operations.isNotEmpty &&
           textController.text[textController.text.length - 1] ==
               operations.last) {
         operations.removeLast();
       }
-      textController.text =
-          textController.text.substring(0, textController.text.length - 1);
+      if (textController.text.length > 1) {
+        textController.text =
+            textController.text.substring(0, textController.text.length - 1);
+      } else {
+        textController.text = '0';
+      }
     }
 
     var number;
@@ -162,7 +334,7 @@ class _CalculatorTabState extends State<CalculatorTab> {
         number = int.tryParse(
                 textController.text.substring(lastOperIndex + 1)) ??
             double.tryParse(textController.text.substring(lastOperIndex + 1));
-        _numbers.last = number!;
+        _numbers.last = number;
       }
     } else {
       if (textController.text.isNotEmpty) {
@@ -170,11 +342,12 @@ class _CalculatorTabState extends State<CalculatorTab> {
             double.tryParse(textController.text);
         _numbers.last = number;
       }
+      textController.text = '0';
     }
 
     // print(_numbers);
-    res = _calculate();
-    resultTextController.text = (res).toString();
+    addCommaToNumber();
+    _setResult();
     if (textController.text.isEmpty) {
       resultTextController.text = '0';
     }
@@ -188,10 +361,9 @@ class _CalculatorTabState extends State<CalculatorTab> {
   }
 
   void _getResult() {
-    // print(res);
     _clear();
-    _numbers.add(res);
     resultTextController.text = res.toString();
+    addComma(res, setResText, getResText);
   }
 
   @override
@@ -204,7 +376,7 @@ class _CalculatorTabState extends State<CalculatorTab> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         TextField(
           readOnly: true,
@@ -230,7 +402,7 @@ class _CalculatorTabState extends State<CalculatorTab> {
             children: [
               CalcButton('C', _clear),
               CalcButton('\u232b', _deleteSymbol),
-              CalcButton('%', () {}),
+              CalcButton('%', _tapPercent),
               CalcButton('\u00F7', () {
                 _tapOper('\u00F7');
               }),
@@ -297,10 +469,16 @@ class _CalculatorTabState extends State<CalculatorTab> {
               CalcButton('+', () {
                 _tapOper('+');
               }),
-              IconButton(
-                icon: Icon(Icons.change_circle_outlined),
-                color: Theme.of(context).primaryColor,
-                onPressed: () {},
+              // IconButton(
+              //   icon: Icon(Icons.change_circle_outlined),
+              //   color: Theme.of(context).primaryColor,
+              //   onPressed: () {},
+              // ),
+              CalcButton(
+                '00',
+                () {
+                  _tapNum('00');
+                },
               ),
               CalcButton(
                 '0',
@@ -308,7 +486,7 @@ class _CalculatorTabState extends State<CalculatorTab> {
                   _tapNum('0');
                 },
               ),
-              CalcButton('.', () {}),
+              CalcButton('.', _tapDot),
               CalcButton('=', _getResult),
             ],
           ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class CalcButton extends StatelessWidget {
-  final text;
+  final String text;
   final VoidCallback func;
 
   CalcButton(this.text, this.func);
