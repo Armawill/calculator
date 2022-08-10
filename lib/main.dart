@@ -28,7 +28,7 @@ class _MyHomepageState extends State<MyHomepage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    var _tabController = TabController(vsync: this, length: 3);
+    var _tabController = TabController(vsync: this, length: 2);
     return Scaffold(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -45,9 +45,9 @@ class _MyHomepageState extends State<MyHomepage> with TickerProviderStateMixin {
                 Tab(
                   child: Text('Unit Converter'),
                 ),
-                Tab(
-                  child: Text('Exchange Rate'),
-                ),
+                // Tab(
+                //   child: Text('Exchange Rate'),
+                // ),
               ],
             ),
           ),
@@ -61,7 +61,7 @@ class _MyHomepageState extends State<MyHomepage> with TickerProviderStateMixin {
               children: [
                 CalculatorTab(),
                 UnitConverterTab(),
-                Text('3'),
+                //Text('3'),
               ],
             ),
           ),
